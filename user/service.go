@@ -1,6 +1,10 @@
 package user
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"errors"
+
+	"golang.org/x/crypto/bcrypt"
+)
 
 /**
 1. mapping input struct to struct user
@@ -10,12 +14,14 @@ import "golang.org/x/crypto/bcrypt"
 // interface for connected another file or code to service.go
 type Service interface {
 	RegisterUser(input RegisterUserInput) (User, error)
+	Login(input LoginInput) (User, error)
 }
 
 type service struct {
 	repository Repository
 }
 
+// this code call in main.go
 func NewService(repository Repository) *service {
 	return &service{repository}
 }
@@ -39,4 +45,28 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 	}
 
 	return newUser, nil
+}
+
+func (s *service) Login(input LoginInput) (User, error) {
+	// get email and password from user.input.go
+	email := input.Email
+	password := input.Password
+
+	user, err := s.repository.FindByEmail(email)
+	if err != nil {
+		return user, err
+	}
+
+	// check available user email
+	if user.ID == 0 {
+		return user, errors.New("User not found!")
+	}
+
+	// check match password when user available
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
 }
