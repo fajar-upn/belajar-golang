@@ -17,3 +17,10 @@ type LoginInput struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
 }
+
+/**
+this struct represent input from register user form, when email available or not
+*/
+type CheckEmailInput struct {
+	Email string `json:"email" binding:"required,email"`
+}

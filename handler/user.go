@@ -97,3 +97,48 @@ func (h *userHandler) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+// error handling when email already exist
+func (h *userHandler) CheckEmailAvailability(c *gin.Context) {
+	/**
+	step by step check available email
+	1. check email input from user form (user.input.go)
+	2. input email will be mapping to struct input (handler.user.go)
+	3. input struct will passing (handler.user.go) to service (user.service.go)
+	4. service (user.service.go) will be call repository (user.repository)
+	5. call database in repository (user.repository)
+	*/
+	var input user.CheckEmailInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Email has been available!", http.StatusUnauthorized, "errors", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	isEmailAvailable, err := h.userService.IsEmailAvailable(input)
+	if err != nil {
+		errorMessage := gin.H{"errors": "Server error"}
+
+		response := helper.APIResponse("Email check error", http.StatusUnauthorized, "errors", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	data := gin.H{
+		"is_available": isEmailAvailable,
+	}
+
+	// organize status to API
+	var metaMessage string
+	if !isEmailAvailable {
+		metaMessage = "Email has been registered"
+	}
+
+	response := helper.APIResponse(metaMessage, http.StatusOK, "success", data)
+	c.JSON(http.StatusOK, response)
+}
