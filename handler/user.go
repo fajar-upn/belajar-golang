@@ -3,6 +3,7 @@ package handler
 import (
 	"bwastartup/helper"
 	"bwastartup/user"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -141,4 +142,61 @@ func (h *userHandler) CheckEmailAvailability(c *gin.Context) {
 
 	response := helper.APIResponse(metaMessage, http.StatusOK, "success", data)
 	c.JSON(http.StatusOK, response)
+}
+
+func (h *userHandler) UploadAvatar(c *gin.Context) {
+
+	/**
+	note: we don't need mapping image
+	this is step by step for upload image
+	1. Receive input from user
+	2. save image in "images/" folder
+	3. in the service (user.service.go) we call repository (user.service.go)
+	3.1 for call access user with JWT (for a while user has been login/ hardcode to login because using jwt with appropriate ID)
+	3.2 call repository with appropriate user id, ex: user_id=1
+	3.2 with repository user data will update and save in file location
+	*/
+	file, err := c.FormFile("avatar") //'avatar' is key form data in postman
+
+	if err != nil {
+		data := gin.H{"is_uploaded": false}
+		response := helper.APIResponse("Failed to upload avatar image", http.StatusBadRequest, "error", data)
+
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	userID := 9 //suppose userId get from JWT, because JWT not available right now
+	/**
+	fmt.printf is concat string.
+	file.filename for get filename
+	(images/<ID>/<IMAGE_PATH>)
+	%d will be override with "userID"
+	%s will be override with "file.Filename"
+	*/
+	path := fmt.Sprintf("images/%d - %s", userID, file.Filename)
+
+	err = c.SaveUploadedFile(file, path) //save file(image)
+	if err != nil {
+		data := gin.H{"is_uploaded": false}
+		response := helper.APIResponse("Failed to upload avatar image!", http.StatusBadRequest, "error", data)
+
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	_, err = h.userService.SaveAvatar(userID, path)
+	if err != nil {
+		data := gin.H{"is_uploaded": false}
+		response := helper.APIResponse("Failed to upload avatar image!", http.StatusBadRequest, "error", data)
+
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	data := gin.H{"is_uploaded": true}
+	response := helper.APIResponse("Success to upload avatar image", http.StatusOK, "success", data)
+
+	c.JSON(http.StatusOK, response)
+
 }
