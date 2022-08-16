@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bwastartup/auth"
 	"bwastartup/handler"
 	"bwastartup/user"
 	"log"
@@ -31,7 +32,8 @@ func main() {
 
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
-	userHandler := handler.NewUserHandler(userService)
+	authService := auth.NewService() //call jwt service
+	userHandler := handler.NewUserHandler(userService, authService)
 
 	router := gin.Default()
 	api := router.Group("/api/v1")
@@ -40,5 +42,6 @@ func main() {
 	api.POST("/sessions", userHandler.Login)                        //API session
 	api.POST("/email_checkers", userHandler.CheckEmailAvailability) //API for check availability email
 	api.POST("/avatars", userHandler.UploadAvatar)                  //API for upload avatar image
+
 	router.Run()
 }
