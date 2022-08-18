@@ -180,7 +180,9 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	userID := 9 //suppose userId get from JWT, because JWT not available right now
+	currentUser := c.MustGet("currentUser").(user.User)
+	userID := currentUser.ID
+	// userID := 9 //suppose userId get from JWT, because JWT not available right now
 	/**
 	fmt.printf is concat string.
 	file.filename for get filename
@@ -212,5 +214,4 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 	response := helper.APIResponse("Success to upload avatar image", http.StatusOK, "success", data)
 
 	c.JSON(http.StatusOK, response)
-
 }

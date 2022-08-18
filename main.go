@@ -3,10 +3,13 @@ package main
 import (
 	"bwastartup/auth"
 	"bwastartup/handler"
+	"bwastartup/helper"
 	"bwastartup/user"
-	"fmt"
 	"log"
+	"net/http"
+	"strings"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -34,24 +37,6 @@ func main() {
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
 	authService := auth.NewService() //call jwt service
-	token, err := authService.ValidateToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo5fQ.s4ojLNAt2KDhrMzkyAv_Rh8s-4fUElK-d8MZbN-d0cI")
-	if err != nil {
-		fmt.Println("ERROR")
-		fmt.Println("ERROR")
-		fmt.Println("ERROR")
-	}
-
-	if token.Valid {
-		fmt.Println("VALID")
-		fmt.Println("VALID")
-		fmt.Println("VALID")
-	} else {
-		fmt.Println("INVALID")
-		fmt.Println("INVALID")
-		fmt.Println("INVALID")
-	}
-
-	fmt.Println(authService)
 	userHandler := handler.NewUserHandler(userService, authService)
 
 	router := gin.Default()
@@ -60,7 +45,75 @@ func main() {
 	api.POST("/users", userHandler.RegisterUser)                    //API register
 	api.POST("/sessions", userHandler.Login)                        //API session
 	api.POST("/email_checkers", userHandler.CheckEmailAvailability) //API for check availability email
-	api.POST("/avatars", userHandler.UploadAvatar)                  //API for upload avatar image
+	/**
+	authMiddleware for 'validate jwt token'
+	authMiddleware(auth.service, user.service) : we just parse auth middleware
+	authMiddleware() : we get return from authMiddleware function
+	in the middleware me must 'Parsing' function, not get return value
+	*/
+	api.POST("/avatars", authMiddleware(authService, userService), userHandler.UploadAvatar) //API for upload avatar image
 
 	router.Run()
+}
+
+/**
+step by step middleware :
+'this middleware for validate jwt token'
+1. get value authorization. example: bearer tokentokentoken
+2. from header authorization, we take just token value
+3. we validate token
+4, if token valid we get user_id
+5. get user from db appropriate 'user_id' through service
+6. if user available we set context with 'user'
+*/
+func authMiddleware(authService auth.Service, userService user.Service) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+
+		if !strings.Contains(authHeader, "Bearer") { //if in header not contain 'Bearer'
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+
+			/**
+			using abort with status json, because for reject middleware will call in middle
+			example: api.POST("/avatars",<MIDDLEWARE>, userHandler.UploadAvatar)
+			*/
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		// value of token is 'Bearer <RANDOM_TOKEN>'
+		var tokenString string = ""
+		tokenArray := strings.Split(authHeader, " ")
+		if len(tokenArray) == 2 {
+			tokenString = tokenArray[1]
+		}
+
+		// auth service
+		token, err := authService.ValidateToken(tokenString)
+		if err != nil {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		claim, ok := token.Claims.(jwt.MapClaims)
+		if !ok || !token.Valid {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		userID := int(claim["user_id"].(float64))
+
+		// userservice
+		user, err := userService.GetUserById(userID)
+
+		if err != nil {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		c.Set("currentUser", user) //current user meaning user is logged in or access this application
+	}
 }
