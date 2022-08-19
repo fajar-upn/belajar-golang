@@ -6,7 +6,6 @@ import (
 	"bwastartup/handler"
 	"bwastartup/helper"
 	"bwastartup/user"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -43,12 +42,7 @@ func main() {
 
 	campaignRepository := campaign.NewRepository(db)
 	campaignService := campaign.NewService(campaignRepository)
-
-	campaign, err := campaignService.FindCampaigns(0)
-	if err != nil {
-		fmt.Println(campaign, err)
-	}
-	fmt.Println(campaign, nil)
+	compaignHandler := handler.NewCampaignHandler(campaignService)
 
 	router := gin.Default()
 	api := router.Group("/api/v1")
@@ -56,6 +50,8 @@ func main() {
 	api.POST("/users", userHandler.RegisterUser)                    //API register
 	api.POST("/sessions", userHandler.Login)                        //API session
 	api.POST("/email_checkers", userHandler.CheckEmailAvailability) //API for check availability email
+
+	api.GET("/campaigns", compaignHandler.GetCampaigns) //API for get campaigns
 	/**
 	authMiddleware for 'validate jwt token'
 	authMiddleware(auth.service, user.service) : we just parse auth middleware
