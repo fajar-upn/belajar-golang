@@ -37,16 +37,18 @@ func main() {
 	}
 
 	userRepository := user.NewRepository(db)
-	campaignRepository := campaign.NewRepository(db)
-	campaign, err := campaignRepository.FindByUserID(1)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(campaign)
-
 	userService := user.NewService(userRepository)
 	authService := auth.NewService() //call jwt service
 	userHandler := handler.NewUserHandler(userService, authService)
+
+	campaignRepository := campaign.NewRepository(db)
+	campaignService := campaign.NewService(campaignRepository)
+
+	campaign, err := campaignService.FindCampaigns(0)
+	if err != nil {
+		fmt.Println(campaign, err)
+	}
+	fmt.Println(campaign, nil)
 
 	router := gin.Default()
 	api := router.Group("/api/v1")
