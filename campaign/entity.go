@@ -15,7 +15,7 @@ type Campaign struct {
 	Slug             string
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
-	CampaignImages   []CampaignImage
+	CampaignImages   []CampaignImage //when need relational this code is necessary
 }
 
 type CampaignImage struct {
