@@ -42,16 +42,19 @@ func main() {
 
 	campaignRepository := campaign.NewRepository(db)
 	campaignService := campaign.NewService(campaignRepository)
-	compaignHandler := handler.NewCampaignHandler(campaignService)
+	campaignHandler := handler.NewCampaignHandler(campaignService)
 
 	router := gin.Default()
+	router.Static("/images", "./images") // this route for access avatar endpoint. '/images' is path endpoint, mean while './images' is name of folder
 	api := router.Group("/api/v1")
 
 	api.POST("/users", userHandler.RegisterUser)                    //API register
 	api.POST("/sessions", userHandler.Login)                        //API session
 	api.POST("/email_checkers", userHandler.CheckEmailAvailability) //API for check availability email
 
-	api.GET("/campaigns", compaignHandler.GetCampaigns) //API for get campaigns
+	api.GET("/campaigns", campaignHandler.GetCampaigns)    //API for get campaigns
+	api.GET("/campaigns/:id", campaignHandler.GetCampaign) //APi for detail campaign, :id is URI
+
 	/**
 	authMiddleware for 'validate jwt token'
 	authMiddleware(auth.service, user.service) : we just parse auth middleware
