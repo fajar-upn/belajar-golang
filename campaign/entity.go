@@ -18,7 +18,7 @@ type Campaign struct {
 	Slug             string
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
-	CampaignImages   []CampaignImage //when need relational this code is necessary
+	CampaignImages   []CampaignImage //when need relational, this code is necessary
 	User             user.User       //this code relational with 'user/User' or (folder/function)
 }
 

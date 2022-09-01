@@ -3,6 +3,7 @@ package handler
 import (
 	"bwastartup/campaign"
 	"bwastartup/helper"
+	"bwastartup/user"
 	"net/http"
 	"strconv"
 
@@ -67,5 +68,40 @@ func (h *CampaignHandler) GetCampaign(c *gin.Context) {
 	}
 
 	response := helper.APIResponse("Detail Campaign", http.StatusOK, "success", campaign.FormatCampaignDetail(campaignDetail))
+	c.JSON(http.StatusOK, response)
+}
+
+/**
+step by step campaign:
+
+1. get parameter from user to input struct
+2. get current user from JWT or handler
+3. call service, where parameter input (can create slug automatically)
+4. call repository for save new campaign data
+*/
+func (h *CampaignHandler) CreateCampaign(c *gin.Context) {
+	var input campaign.CreateCampaignInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Failed to create campaign", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User) //get data from user table
+	input.User = currentUser
+
+	newCampign, err := h.service.CreateCampaign(input)
+	if err != nil {
+		response := helper.APIResponse("Failed to create campaign", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Create campaign has been success", http.StatusOK, "success", campaign.FormatCampaign(newCampign))
 	c.JSON(http.StatusOK, response)
 }
