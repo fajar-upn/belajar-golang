@@ -52,9 +52,10 @@ func main() {
 	api.POST("/sessions", userHandler.Login)                        //API session
 	api.POST("/email_checkers", userHandler.CheckEmailAvailability) //API for check availability email
 
-	api.GET("/campaigns", campaignHandler.GetCampaigns)                                              //API for get campaigns
-	api.GET("/campaigns/:id", campaignHandler.GetCampaign)                                           //API for detail campaign, :id is URI
-	api.POST("/campaigns", authMiddleware(authService, userService), campaignHandler.CreateCampaign) //API for create campiagn, appripriate which user-created
+	api.GET("/campaigns", campaignHandler.GetCampaigns)                                                 //API for get campaigns
+	api.GET("/campaigns/:id", campaignHandler.GetCampaign)                                              //API for detail campaign, :id is URI
+	api.POST("/campaigns", authMiddleware(authService, userService), campaignHandler.CreateCampaign)    //API for create campiagn, appripriate which user-created
+	api.PUT("/campaigns/:id", authMiddleware(authService, userService), campaignHandler.UpdateCampaign) //API for update campiagn, appripriate which user-created
 
 	/**
 	authMiddleware for 'validate jwt token'
