@@ -56,6 +56,7 @@ func main() {
 	api.GET("/campaigns/:id", campaignHandler.GetCampaign)                                              //API for detail campaign, :id is URI
 	api.POST("/campaigns", authMiddleware(authService, userService), campaignHandler.CreateCampaign)    //API for create campiagn, appripriate which user-created
 	api.PUT("/campaigns/:id", authMiddleware(authService, userService), campaignHandler.UpdateCampaign) //API for update campiagn, appripriate which user-created
+	api.POST("/campaign-images", authMiddleware(authService, userService), campaignHandler.UploadImage) //API for upload image in the campiagn, appripriate which user-created
 
 	/**
 	authMiddleware for 'validate jwt token'
