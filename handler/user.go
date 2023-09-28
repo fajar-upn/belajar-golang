@@ -58,6 +58,7 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	}
 
 	formatter := user.FormatUser(newUser, token)
+	// fmt.Println(newUser)
 
 	response := helper.APIResponse("Registration account success", http.StatusOK, "success", formatter)
 
