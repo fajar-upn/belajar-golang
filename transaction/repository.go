@@ -6,7 +6,7 @@ type repository struct {
 	db *gorm.DB
 }
 
-func NewRepoitory(db *gorm.DB) repository {
+func NewRepository(db *gorm.DB) repository {
 	return repository{db}
 }
 
