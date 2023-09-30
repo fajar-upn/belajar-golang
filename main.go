@@ -5,6 +5,7 @@ import (
 	"bwastartup/campaign"
 	"bwastartup/handler"
 	"bwastartup/helper"
+	"bwastartup/transaction"
 	"bwastartup/user"
 	"log"
 	"net/http"
@@ -44,6 +45,10 @@ func main() {
 	campaignService := campaign.NewService(campaignRepository)
 	campaignHandler := handler.NewCampaignHandler(campaignService)
 
+	transactionRepository := transaction.NewRepository(db)
+	transactionService := transaction.NewService(&transactionRepository)
+	transactionHandler := handler.NewTransactionHandler(transactionService)
+
 	router := gin.Default()
 	router.Static("/images", "./images") // this route for access avatar endpoint. '/images' is path endpoint, mean while './images' is name of folder
 	api := router.Group("/api/v1")
@@ -58,6 +63,8 @@ func main() {
 	api.PUT("/campaigns/:id", authMiddleware(authService, userService), campaignHandler.UpdateCampaign) //API for update campiagn, appripriate which user-created
 	api.POST("/campaign-images", authMiddleware(authService, userService), campaignHandler.UploadImage) //API for upload image in the campiagn, appripriate which user-created
 
+	api.GET("/campaigns/:id/transactions", authMiddleware(authService, userService), transactionHandler.GetCampaignTransactions)
+
 	/**
 	authMiddleware for 'validate jwt token'
 	authMiddleware(auth.service, user.service) : we just parse auth middleware
@@ -69,7 +76,8 @@ func main() {
 	router.Run()
 }
 
-/**
+/*
+*
 step by step middleware :
 'this middleware for validate jwt token'
 1. get value authorization. example: bearer tokentokentoken
