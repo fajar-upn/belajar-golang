@@ -9,11 +9,11 @@ func NewService(repository Repository) *service {
 }
 
 type Service interface {
-	GetTransactionByCampaignID(input GetCampaignTransactionInput) ([]Transaction, error)
+	GetTransactionByCampaignID(input GetCampaignTransactionInput, userID int) ([]Transaction, error)
 }
 
-func (s *service) GetTransactionByCampaignID(input GetCampaignTransactionInput) ([]Transaction, error) {
-	transaction, err := s.repository.GetByCampaignID(input.ID)
+func (s *service) GetTransactionByCampaignID(input GetCampaignTransactionInput, userID int) ([]Transaction, error) {
+	transaction, err := s.repository.GetByCampaignID(input.ID, userID)
 	if err != nil {
 		return nil, err
 	}
