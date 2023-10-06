@@ -14,6 +14,11 @@ type Service interface {
 
 func (s *service) GetTransactionByCampaignID(input GetCampaignTransactionInput, userID int) ([]Transaction, error) {
 	transaction, err := s.repository.GetByCampaignID(input.ID, userID)
+
+	if transaction == nil {
+		return nil, nil
+	}
+
 	if err != nil {
 		return nil, err
 	}
