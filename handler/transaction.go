@@ -20,7 +20,7 @@ func NewTransactionHandler(service transaction.Service) *transactionHandler {
 func (h *transactionHandler) GetCampaignTransactions(c *gin.Context) {
 	var input transaction.GetCampaignTransactionInput
 
-	user_id, _ := c.MustGet("currentUser").(user.User)
+	currentUser, _ := c.MustGet("currentUser").(user.User)
 
 	err := c.ShouldBindUri(&input)
 	if err != nil {
@@ -29,21 +29,16 @@ func (h *transactionHandler) GetCampaignTransactions(c *gin.Context) {
 		return
 	}
 
-	transactions, err := h.service.GetTransactionByCampaignID(input, user_id.ID)
+	input.User = currentUser
 
-	if transactions == nil {
-		response := helper.APIResponse("Campaign detail is empty", http.StatusOK, "success", transaction.FormatCampignTransactions(transactions))
-		c.JSON(http.StatusOK, response)
-		return
-	}
-
+	transactions, err := h.service.GetTransactionByCampaignID(input)
 	if err != nil {
-		response := helper.APIResponse("Failed to get campaign's transactions", http.StatusBadRequest, "error", nil)
+		response := helper.APIResponse("Failed to get campaign's transactions", http.StatusBadRequest, "error", err.Error())
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	response := helper.APIResponse("Campaign detail", http.StatusOK, "success", transaction.FormatCampignTransactions(transactions))
+	response := helper.APIResponse("List of transactions", http.StatusOK, "success", transaction.FormatCampignTransactions(transactions))
 	c.JSON(http.StatusOK, response)
 
 }
