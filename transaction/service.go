@@ -25,7 +25,7 @@ func (s *service) GetTransactionByCampaignID(input GetCampaignTransactionInput) 
 		return nil, err
 	}
 
-	if campaign.ID != input.User.ID {
+	if campaign.UserID != input.User.ID {
 		return nil, errors.New("this campaign transaction is not own user")
 	}
 
