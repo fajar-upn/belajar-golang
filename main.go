@@ -64,6 +64,7 @@ func main() {
 	api.POST("/campaign-images", authMiddleware(authService, userService), campaignHandler.UploadImage) //API for upload image in the campiagn, appripriate which user-created
 
 	api.GET("/campaigns/:id/transactions", authMiddleware(authService, userService), transactionHandler.GetCampaignTransactions)
+	api.GET("/transactions", authMiddleware(authService, userService), transactionHandler.GetUserTransactions)
 
 	/**
 	authMiddleware for 'validate jwt token'
