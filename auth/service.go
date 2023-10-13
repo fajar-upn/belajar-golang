@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -27,6 +28,7 @@ var SECRET_KEY = []byte("SECRET_KEY") //in the production level, don't write sec
 func (s *jwtService) GenerateToken(userID int) (string, error) {
 	claim := jwt.MapClaims{}
 	claim["user_id"] = userID
+	claim["exp"] = time.Now().Add(time.Hour * 2).Unix()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim) //we can choose SigningMethod, JWT have lot of signing method
 
