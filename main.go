@@ -53,6 +53,16 @@ func main() {
 	router.Static("/images", "./images") // this route for access avatar endpoint. '/images' is path endpoint, mean while './images' is name of folder
 	api := router.Group("/api/v1")
 
+	user, _ := userService.GetUserById(1)
+
+	input := transaction.CreateTransactionInput{
+		CampaignID: 1,
+		Amount:     20000,
+		User:       user,
+	}
+
+	transactionService.CreateTransactionService(input)
+
 	api.POST("/users", userHandler.RegisterUser)                    //API register
 	api.POST("/sessions", userHandler.Login)                        //API session
 	api.POST("/email_checkers", userHandler.CheckEmailAvailability) //API for check availability email

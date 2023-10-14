@@ -3,6 +3,8 @@ package transaction
 import (
 	"bwastartup/campaign"
 	"errors"
+	"fmt"
+	"math/rand"
 )
 
 type service struct {
@@ -17,6 +19,7 @@ func NewService(repository Repository, campignRepository campaign.Repository) *s
 type Service interface {
 	GetTransactionByCampaignID(input GetCampaignTransactionInput) ([]Transaction, error)
 	GetTransactionByUserID(userID int) ([]Transaction, error)
+	CreateTransactionService(input CreateTransactionInput) (*Transaction, error)
 }
 
 func (s *service) GetTransactionByCampaignID(input GetCampaignTransactionInput) ([]Transaction, error) {
@@ -45,4 +48,25 @@ func (s *service) GetTransactionByUserID(userID int) ([]Transaction, error) {
 	}
 
 	return transaction, nil
+}
+
+func (s *service) CreateTransactionService(input CreateTransactionInput) (*Transaction, error) {
+
+	RandomInteger := rand.Int()
+	RandomCode := fmt.Sprintf("ORDER-%d", RandomInteger)
+
+	transaction := Transaction{
+		CampaignID: input.CampaignID,
+		Amount:     input.Amount,
+		UserID:     input.User.ID,
+		Status:     "Pending",
+		Code:       RandomCode,
+	}
+
+	newTransaction, err := s.repository.CreateTransactionRepository(transaction)
+	if err != nil {
+		return nil, err
+	}
+
+	return newTransaction, nil
 }
