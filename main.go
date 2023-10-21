@@ -5,6 +5,7 @@ import (
 	"bwastartup/campaign"
 	"bwastartup/handler"
 	"bwastartup/helper"
+	"bwastartup/payment"
 	"bwastartup/transaction"
 	"bwastartup/user"
 	"log"
@@ -36,6 +37,8 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
+	paymentService := payment.NewService()
+
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
 	authService := auth.NewService() //call jwt service
@@ -46,7 +49,7 @@ func main() {
 	campaignHandler := handler.NewCampaignHandler(campaignService)
 
 	transactionRepository := transaction.NewRepository(db)
-	transactionService := transaction.NewService(&transactionRepository, campaignRepository)
+	transactionService := transaction.NewService(&transactionRepository, campaignRepository, paymentService)
 	transactionHandler := handler.NewTransactionHandler(transactionService)
 
 	router := gin.Default()
