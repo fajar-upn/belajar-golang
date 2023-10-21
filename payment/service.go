@@ -10,14 +10,14 @@ import (
 type servicePayment struct{}
 
 type ServicePayment interface {
-	GetPaymenURL(Transaction, user.User) (string, error)
+	GetPaymentURL(Transaction, user.User) (string, error)
 }
 
 func NewService() *servicePayment {
 	return &servicePayment{}
 }
 
-func (s *servicePayment) GetPaymenURL(transaction Transaction, user user.User) (string, error) {
+func (s *servicePayment) GetPaymentURL(transaction Transaction, user user.User) (string, error) {
 	midClient := midtrans.NewClient()
 	midClient.ServerKey = ""
 	midClient.ClientKey = ""
