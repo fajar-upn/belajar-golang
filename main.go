@@ -37,6 +37,8 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
+	paymentService := payment.NewService()
+
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
 	authService := auth.NewService() //call jwt service
