@@ -1,7 +1,6 @@
 package payment
 
 import (
-	"bwastartup/transaction"
 	"bwastartup/user"
 	"strconv"
 
@@ -11,14 +10,14 @@ import (
 type servicePayment struct{}
 
 type ServicePayment interface {
-	GetPaymenURL(transaction.Transaction, user.User) (string, error)
+	GetPaymenURL(Transaction, user.User) (string, error)
 }
 
 func NewService() *servicePayment {
 	return &servicePayment{}
 }
 
-func (s *servicePayment) GetPaymenURL(transaction transaction.Transaction, user user.User) (string, error) {
+func (s *servicePayment) GetPaymenURL(transaction Transaction, user user.User) (string, error) {
 	midClient := midtrans.NewClient()
 	midClient.ServerKey = ""
 	midClient.ClientKey = ""
