@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"bwastartup/campaign"
+	"bwastartup/payment"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -10,10 +11,11 @@ import (
 type service struct {
 	repository         Repository
 	campaignRepository campaign.Repository
+	paymentService     payment.ServicePayment
 }
 
-func NewService(repository Repository, campignRepository campaign.Repository) *service {
-	return &service{repository, campignRepository}
+func NewService(repository Repository, campignRepository campaign.Repository, paymentService payment.ServicePayment) *service {
+	return &service{repository, campignRepository, paymentService}
 }
 
 type Service interface {
