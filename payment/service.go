@@ -2,9 +2,11 @@ package payment
 
 import (
 	"bwastartup/user"
+	"fmt"
 	"strconv"
 
-	"github.com/veritrans/go-midtrans"
+	"github.com/midtrans/midtrans-go"
+	"github.com/midtrans/midtrans-go/snap"
 )
 
 type servicePayment struct{}
@@ -18,29 +20,26 @@ func NewService() *servicePayment {
 }
 
 func (s *servicePayment) GetPaymentURL(transaction Transaction, user user.User) (string, error) {
-	midClient := midtrans.NewClient()
-	midClient.ServerKey = ""
-	midClient.ClientKey = ""
 
-	snapGateway := midtrans.SnapGateway{
-		Client: midClient,
-	}
+	// 1. Set you ServerKey with globally
+	midtrans.ServerKey = ""
+	midtrans.Environment = midtrans.Sandbox
 
-	snapReq := &midtrans.SnapReq{
-		CustomerDetail: &midtrans.CustDetail{
-			Email: user.Email,
-		},
+	// 2. Initiate Snap request
+	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
 			OrderID:  strconv.Itoa(transaction.ID),
 			GrossAmt: int64(transaction.Amount),
 		},
 	}
 
-	snapTokenResp, err := snapGateway.GetToken(snapReq)
+	// 3. Request create Snap transaction to Midtrans
+	snapResp, err := snap.CreateTransaction(req)
 	if err != nil {
+		fmt.Println("Error here")
 		return "", err
 	}
+	fmt.Println("Response :", snapResp)
 
-	return snapTokenResp.RedirectURL, nil
-
+	return snapResp.RedirectURL, nil
 }
