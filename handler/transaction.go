@@ -77,7 +77,7 @@ func (h *transactionHandler) CreateTransactionHandler(c *gin.Context) {
 
 	newTransaction, err := h.service.CreateTransactionService(input)
 	if err != nil {
-		response := helper.APIResponse("Failed to create transaction", http.StatusBadRequest, "error", nil)
+		response := helper.APIResponse("Failed to create transaction", http.StatusBadRequest, "error", err)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
