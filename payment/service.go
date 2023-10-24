@@ -2,7 +2,6 @@ package payment
 
 import (
 	"bwastartup/user"
-	"fmt"
 	"os"
 	"strconv"
 
@@ -10,7 +9,6 @@ import (
 	"github.com/midtrans/midtrans-go/snap"
 
 	"github.com/joho/godotenv"
-	_ "github.com/joho/godotenv"
 )
 
 type servicePayment struct {
@@ -35,13 +33,16 @@ func (s *servicePayment) GetPaymentURL(transaction Transaction, user user.User) 
 	midtrans.ServerKey = os.Getenv("SERVER_KEY")
 	midtrans.Environment = midtrans.Sandbox
 
-	fmt.Println(midtrans.ServerKey)
-
 	// 2. Initiate Snap request
 	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
-			OrderID:  strconv.Itoa(transaction.ID),
+			OrderID: strconv.Itoa(transaction.ID),
+			// OrderID:  transaction.Code,
 			GrossAmt: int64(transaction.Amount),
+		},
+		CustomerDetail: &midtrans.CustomerDetails{
+			FName: user.Name,
+			Email: user.Email,
 		},
 	}
 
