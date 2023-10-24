@@ -3,13 +3,18 @@ package payment
 import (
 	"bwastartup/user"
 	"fmt"
+	"os"
 	"strconv"
 
-	"github.com/midtrans/midtrans-go"
+	midtrans "github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/snap"
+
+	"github.com/joho/godotenv"
+	_ "github.com/joho/godotenv"
 )
 
-type servicePayment struct{}
+type servicePayment struct {
+}
 
 type ServicePayment interface {
 	GetPaymentURL(Transaction, user.User) (string, error)
@@ -21,9 +26,16 @@ func NewService() *servicePayment {
 
 func (s *servicePayment) GetPaymentURL(transaction Transaction, user user.User) (string, error) {
 
+	err := godotenv.Load(".env")
+	if err != nil {
+		return "", err
+	}
+
 	// 1. Set you ServerKey with globally
-	midtrans.ServerKey = ""
+	midtrans.ServerKey = os.Getenv("SERVER_KEY")
 	midtrans.Environment = midtrans.Sandbox
+
+	fmt.Println(midtrans.ServerKey)
 
 	// 2. Initiate Snap request
 	req := &snap.Request{
@@ -34,12 +46,7 @@ func (s *servicePayment) GetPaymentURL(transaction Transaction, user user.User) 
 	}
 
 	// 3. Request create Snap transaction to Midtrans
-	snapResp, err := snap.CreateTransaction(req)
-	if err != nil {
-		fmt.Println("Error here")
-		return "", err
-	}
-	fmt.Println("Response :", snapResp)
+	snapResp, _ := snap.CreateTransaction(req)
 
 	return snapResp.RedirectURL, nil
 }
