@@ -73,6 +73,7 @@ func (s *service) CreateTransactionService(input CreateTransactionInput) (*Trans
 	paymentTransaction := payment.Transaction{
 		ID:     newTransaction.ID,
 		Amount: newTransaction.Amount,
+		Code:   newTransaction.Code,
 	}
 
 	paymentURL, err := s.paymentService.GetPaymentURL(paymentTransaction, input.User)
